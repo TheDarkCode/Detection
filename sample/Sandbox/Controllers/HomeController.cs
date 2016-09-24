@@ -4,26 +4,43 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Wangkanai.Browser;
+using Wangkanai.Detection;
 
 namespace Sandbox.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IClientInfo _client;        
-
-        public HomeController(IClientInfo client)
+        private readonly ClientInfo client;
+        
+        public HomeController(
+            IDetectionService detectionService,
+            IDeviceResolver deviceResolver, 
+            IBrowserResolver browserResolver, 
+            IEngineResolver engineResolver, 
+            IPlatformResolver platformResolver)
         {
-            _client = client;            
+            client = new ClientInfo
+            {
+                UserAgent = detectionService.UserAgent,
+                Device = deviceResolver.Device,
+                Browser = browserResolver.Browser,
+                Engine = engineResolver.Engine,
+                Platform = platformResolver.Platform
+            };
         }
 
         public IActionResult Index()
         {
-            var browser = Request.Browser();
-            var device = Request.Device();
-            var platform = Request.Platform();            
-            var engine = Request.Engine();
-            return View(_client);
-        }
+            return View(client);
+        }        
+    }
+
+    public class ClientInfo
+    {
+        public IUserAgent UserAgent { get; set; }
+        public IDevice Device { get; set; }
+        public IBrowser Browser { get; set; }
+        public IEngine Engine { get; set; }
+        public IPlatform Platform { get; set; }
     }
 }

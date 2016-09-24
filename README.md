@@ -1,40 +1,93 @@
-# ASP.NET Core Browser
-
-[![Build status](https://ci.appveyor.com/api/projects/status/nwke0v8dqp3xkgwr/branch/dev?svg=true)](https://ci.appveyor.com/project/wangkanai/browser/branch/dev) [![NuGet Pre Release](https://img.shields.io/nuget/vpre/Wangkanai.Browser.svg?maxAge=2592000)](https://www.nuget.org/packages/Wangkanai.Browser/)
-
-![ASP.NET Core Responsiveness](https://raw.githubusercontent.com/wangkanai/browser/master/asset/aspnet-core-browser.png)
+# ASP.NET Core Detection
 
 ASP.NET Core client web browser detection extension to resolve devices, platforms, engine of the client.
 
-### Installation - [NuGet](https://www.nuget.org/packages/Wangkanai.Browser/)
+![ASP.NET Core Responsiveness](https://raw.githubusercontent.com/wangkanai/browser/master/asset/aspnet-core-browser.png)
+
+package | build | nuget    |
+--------|-------|----------|
+Wangkanai.Detection | [![Build status](https://ci.appveyor.com/api/projects/status/033qv4nqv8g4altq?svg=true)](https://ci.appveyor.com/project/wangkanai/detection) | [![NuGet Pre Release](https://img.shields.io/nuget/vpre/Wangkanai.Detection.svg?maxAge=2592000)](https://www.nuget.org/packages/Wangkanai.Detection/)  |
+Wangkanai.Detection.Device | | [![NuGet Pre Release](https://img.shields.io/nuget/vpre/Wangkanai.Detection.Device.svg?maxAge=2592000)](https://www.nuget.org/packages/Wangkanai.Detection.Device/) | 
+Wangkanai.Detection.Browser | | [![NuGet Pre Release](https://img.shields.io/nuget/vpre/Wangkanai.Detection.Browser.svg?maxAge=2592000)](https://www.nuget.org/packages/Wangkanai.Browser/) | 
+Wangkanai.Detection.Engine | | [![NuGet Pre Release](https://img.shields.io/nuget/vpre/Wangkanai.Detection.Engine.svg?maxAge=2592000)](https://www.nuget.org/packages/Wangkanai.Engine/) | 
+Wangkanai.Detection.Platform | | [![NuGet Pre Release](https://img.shields.io/nuget/vpre/Wangkanai.Detection.Platform.svg?maxAge=2592000)](https://www.nuget.org/packages/Wangkanai.Platform/) | 
+
+## Device Resolver
+
+This library host the component to resolve the access client device type, maker, model, and identify if the request is an web crawler.
+
+Installation of device resolver library components. 
 
 ```powershell
-PM> install-package Wangkanai.Browser -pre
+PM> install-package Wangkanai.Detection.Device -pre
 ```
 
-### Implement detection the device for each request
+Implement of the library into your web application is done by configuring the `Startup.css` by adding the detection service in the `ConfigureServices` method.
 
-#### Configuring
-Configuring the `Startup.cs` by adding the Client Service in the `ConfigureServices` method.
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
 	// Add browser detection services.
-    services.AddClientService()
-		.AddDevice()
-		.AddBrowser()
-		.AddEngine()
-		.AddPlatform();
+    services.AddDetection()
+		.AddDevice();
 
     // Add framework services.
     services.AddMvc();
 }
 ```
-* `AddClientService()` Adds the client services to the services container.
-* `AddDevice()` Adds the device resolver service to the client services builder.
-* `AddBrowser()` Adds the browser resolver service to the client services builder.
-* `AddEngine()` Adds the engine resolver service to the client services builder.
-* `AddPlatform()` Adds the platform resolver service to the client services builder.
+* `AddDetection()` Adds the detection services to the services container.
+* `AddDevice()` Adds the device resolver service to the detection services builder.
+
+Example of calling the detection service in the `Controller` using dependency injection.
+
+```csharp
+public class HomeController : Controller
+{    
+    private readonly IUserAgent _useragent;
+    private readonly IDevice _device;   
+
+    public HomeController(IDeviceResolver deviceResolverr)
+    {
+        _useragent = deviceResolver.UserAgent,
+        _device = deviceResolver.Device
+    }
+
+    public IActionResult Index()
+    {            
+        return View();
+    }
+}
+```
+* `IDetectionService` is main service for you to access UserAgent
+
+## Concept waiting for development
+
+Installation of device resolver library components.
+
+```powershell
+PM> install-package Wangkanai.Detection.Browser -pre  //concept
+PM> install-package Wangkanai.Detection.Engine -pre   //concept
+PM> install-package Wangkanai.Detection.Platform -pre //concept
+```
+
+Configuring the `Startup.cs` by adding the Client Service in the `ConfigureServices` method.
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+	// Add browser detection services.
+    services.AddDetection()
+		.AddBrowser()   // concept
+		.AddEngine()    // concept
+		.AddPlatform(); // concept
+
+    // Add framework services.
+    services.AddMvc();
+}
+```
+* `AddDetection()` Adds the detection services to the services container.
+* `AddBrowser()` Adds the browser resolver service to the detection services builder.
+* `AddEngine()` Adds the engine resolver service to the detection services builder.
+* `AddPlatform()` Adds the platform resolver service to the detection services builder.
 
 
 #### Usage
@@ -42,17 +95,25 @@ public void ConfigureServices(IServiceCollection services)
 Example of calling the client service in the `Controller`.
 ```csharp
 public class HomeController : Controller
-{
-    private readonly IClientInfo _client;
+{    
+    private readonly IUserAgent _useragent;    
+    private readonly IBrowser _browser;
+    private readonly IEngine _engine;
+    private readonly IPlatform _platform;
 
-    public HomeController(IClientInfo client)
+    public HomeController(IBrowserResolver browserResolver, 
+        IEngineResolver engineResolver, 
+        IPlatformResolver platformResolver)
     {
-        _client = client;
+        _useragent = detectionService.UserAgent,        
+        _browser = browserResolver.Browser,
+        _engine = engineResolver.Engine,
+        _platform = platformResolver.Platform
     }
 
     public IActionResult Index()
     {            
-        return View(_client);
+        return View();
     }
 }
 ```
