@@ -1,6 +1,6 @@
 ﻿{
   "description": "ASP.NET Core Detection service components for identifying details about client device, browser, engine, and platform.",
-  "version": "1.0.0-*",
+  "version": "1.0.0-beta4",
 
   "authors": [ "Sarin Na Wangkanai" ],
   "copyright": "Copyright © 2016 Sarin Na Wangkanai",
